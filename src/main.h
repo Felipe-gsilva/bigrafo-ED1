@@ -1,3 +1,5 @@
+#pragma once
+
 #define NUM_NODES 5
 #define NUM_VERTEXES 7
 

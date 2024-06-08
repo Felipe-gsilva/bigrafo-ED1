@@ -4,7 +4,6 @@
 #include "main.h"
 #include "window.h"
 
-
 int getRandom(int ceil, int floor) {
   return (rand() % ceil) + floor;
 }
@@ -84,7 +83,7 @@ int main() {
     printf("(%.2lf, %.2lf) -> (%.2lf, %.2lf)\n", (verts + i)->from->point.x, (verts + i)->from->point.y, (verts + i)->to->point.x, (verts + i)->to->point.y);
   }
 
-  render();
 
+  render(verts);
   return 0;
 }
