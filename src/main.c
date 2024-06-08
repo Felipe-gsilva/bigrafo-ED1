@@ -49,6 +49,14 @@ void attributeRandomNodesToVertex(Vertex *vertArr, int i, Node *nodes, Node *fro
   }
 }
 
+int isBigraph(Vertex *verts) {
+
+}
+
+void attributeGraphs(Vertex *mainVertArr, Vertex *leftVertexSet, Vertex *rightVertexSet) {
+    
+}
+
 int main() {
   Node *nodes = malloc(sizeof(Node) * NUM_NODES);
 
