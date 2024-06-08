@@ -1,40 +1,57 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "window.h"
 
-
-
-int render()
+int render(Vertex *vertexArr)
 {
-    GLFWwindow* window;
+  GLFWwindow* window;
 
-    if (!glfwInit())
-        return -1;
+  if (!glfwInit())
+    return -1;
+  
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
-    {
-        glfwTerminate();
-        return -1;
-    }
+  uint width = 640;
+  uint height = 480;
 
-    glfwMakeContextCurrent(window);
-
-    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
-
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-    }
-
+  window = glfwCreateWindow(width, height, "Hello World", NULL, NULL);
+  if (!window)
+  {
     glfwTerminate();
-    return 0;
+    return -1;
+  }
+
+
+  glfwMakeContextCurrent(window);
+
+  if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+  {
+    printf("Failed to initialize GLAD\n");
+    return -1;
+  }
+
+  glViewport(0, 0, width, height);
+
+  while (!glfwWindowShouldClose(window))
+  {
+    // input
+    // not doint it fow now
+
+    // render
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  glfwTerminate();
+  return 0;
 }
