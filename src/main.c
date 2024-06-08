@@ -99,9 +99,9 @@ int main() {
     printf("(%.2lf, %.2lf) -> (%.2lf, %.2lf)\n", (edges + i)->from->point.x, (edges + i)->from->point.y, (edges + i)->to->point.x, (edges + i)->to->point.y);
   }
 
-  isBigraph(edges, nodes);
+  if(render(nodes)!= 0)
+    return -1;
 
-  if(render(nodes))
-    return 0;
-  return -1;
+  isBigraph(edges, nodes);
+  return 0;
 }
