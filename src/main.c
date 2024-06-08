@@ -37,8 +37,8 @@ void attributeRandomNodesToVertex(Vertex *vertArr, int i, Node *nodes, Node *fro
     return attributeRandomNodesToVertex(vertArr, i, nodes, fromNode);
   }
 
-  if (vertexHas(vertArr, *(vertArr + i), i + 1)) { // Garante que o grafo vai ser digrafo
-    return;
+  if (vertexHas(vertArr, *(vertArr + i), i)) { // Garante que o grafo vai ser digrafo
+    return attributeRandomNodesToVertex(vertArr, i, nodes, fromNode);
   }
 
   if (fromNode == NULL) {
@@ -48,8 +48,22 @@ void attributeRandomNodesToVertex(Vertex *vertArr, int i, Node *nodes, Node *fro
   }
 }
 
-int isBigraph(Vertex *verts) {
+int isBigraph(Vertex *verts, Node *nodes) {
+  int *visited = malloc(sizeof(int) * NUM_NODES);
+  int i;
+  Node *curr = nodes + 0; // 0 é o nó source
 
+  for (i = 0; i < NUM_NODES; i++) {
+    visited[i] = 0;
+  }
+
+  visited[curr->id]++;
+
+  while(1) {
+
+
+    curr = (verts + curr->id)->to;
+  }
 }
 
 void attributeGraphs(Vertex *mainVertArr, Vertex *leftVertexSet, Vertex *rightVertexSet) {
@@ -72,6 +86,7 @@ int main() {
     attributeRandomValuesToPoint(p);
 
     (nodes + i)->point = *p;
+    (nodes + i)->id = i;
 
     printf("(%.2lf, %.2lf)\n", (nodes + i)->point.x, (nodes + i)->point.y);
   }
@@ -83,7 +98,7 @@ int main() {
     printf("(%.2lf, %.2lf) -> (%.2lf, %.2lf)\n", (verts + i)->from->point.x, (verts + i)->from->point.y, (verts + i)->to->point.x, (verts + i)->to->point.y);
   }
 
-
+  isBigraph(verts, nodes);
   if(render(verts))
     return 0;
   return -1;

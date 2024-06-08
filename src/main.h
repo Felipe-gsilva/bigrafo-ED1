@@ -10,6 +10,7 @@ typedef struct {
 
 typedef struct {
     Point point;
+    int id;
 } Node;
 
 typedef struct {
