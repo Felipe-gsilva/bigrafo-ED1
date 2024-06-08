@@ -84,6 +84,7 @@ int main() {
   }
 
 
-  render(verts);
-  return 0;
+  if(render(verts))
+    return 0;
+  return -1;
 }
