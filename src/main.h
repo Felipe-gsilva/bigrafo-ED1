@@ -1,7 +1,7 @@
 #pragma once
 
 #define NUM_NODES 5
-#define NUM_VERTEXES 7
+#define NUM_EDGES 7
 
 typedef struct {
     double x;
@@ -16,4 +16,4 @@ typedef struct {
 typedef struct {
     Node *from;
     Node *to;
-} Vertex;
+} Edge;
