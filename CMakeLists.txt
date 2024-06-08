@@ -65,9 +65,14 @@ target_include_directories(bigrafo PUBLIC
 target_compile_definitions(bigrafo PUBLIC GLFW_INCLUDE_NONE)
 
 # Link libraries
-target_link_libraries(bigrafo X11 dl pthread)
+if(UNIX AND NOT APPLE)
+  target_link_libraries(bigrafo X11 dl pthread)
+elseif(APPLE)
+  target_link_libraries(bigrafo "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
+else()
+  target_link_libraries(bigrafo opengl32)
+endif()
 
-# If GLFW is part of your project and needs to be built
 add_subdirectory(deps/glfw)
 target_link_libraries(bigrafo glfw)
 

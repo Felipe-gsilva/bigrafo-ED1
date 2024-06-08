@@ -1,4 +1,3 @@
-#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
@@ -7,7 +6,7 @@
 
 #include "window.h"
 
-int render(Vertex *vertexArr)
+int render(Node *vertexArr)
 {
   GLFWwindow* window;
 
@@ -28,7 +27,6 @@ int render(Vertex *vertexArr)
     return -1;
   }
 
-
   glfwMakeContextCurrent(window);
 
   if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
@@ -39,15 +37,35 @@ int render(Vertex *vertexArr)
 
   glViewport(0, 0, width, height);
 
+
+  Point **vertex = getVertexPos(vertexArr);
+
+  unsigned int VBO;
+  glGenBuffers(1, &VBO); 
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+  glBufferData(GL_ARRAY_BUFFER, NUM_NODES, vertex, GL_STATIC_DRAW);
+
   while (!glfwWindowShouldClose(window))
   {
     // input
     // not doint it fow now
 
     // render
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // draw one dot
+    glPointSize(1.0f);
+    glBegin(GL_POINTS);
+
+    for (int i = 0; i < NUM_NODES; i++)
+    {
+      glVertex2f((vertexArr + i)->point.x, (vertexArr + i)->point.y);
+    }
+    glEnd();
+
+    // swap buffers and poll IO events
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
@@ -55,3 +73,21 @@ int render(Vertex *vertexArr)
   glfwTerminate();
   return 0;
 }
+
+Point **getVertexPos(Node *vertexArr)
+{
+  Point **vertexPos;
+  *vertexPos = malloc(sizeof(Point) * NUM_NODES);
+
+  for (int i = 0; i < NUM_NODES; i++)
+  {
+    printf("Vertex %d\n", i);
+    printf("%.2f, %.2f\n%.2f, %.2f\n", (vertexArr + i)->point.x, (vertexArr + i)->point.y, (vertexArr + i)->point.x, (vertexArr + i)->point.y);
+    Point *p = malloc(sizeof(Point));
+    p->x = (vertexArr + i)->point.x;
+    p->y = (vertexArr + i)->point.y;
+    vertexPos[i] = p;
+  };
+  return vertexPos;
+}
+

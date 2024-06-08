@@ -6,4 +6,6 @@ struct OpenGL_Context {
 };
 
 
-int render(Vertex *vertexArr);
+int render(Node *vertexArr);
+
+Point **getVertexPos(Node *vertexArr);

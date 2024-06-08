@@ -3,6 +3,7 @@
 #include <math.h>
 #include "main.h"
 #include "window.h"
+#include <time.h>
 
 int getRandom(int ceil, int floor) {
   return (rand() % ceil) + floor;
@@ -13,8 +14,8 @@ int getRandom(int ceil, int floor) {
  * (x, y) = (93.83, 8.86)
  */
 void attributeRandomValuesToPoint(Point *p) {
-  p->x = getRandom(10000, 0) / 100.0;
-  p->y = getRandom(10000, 0) / 100.0;
+  p->x = (getRandom(15000, 0) / 10000.0) - 0.5;
+  p->y = (getRandom(15000, 0) / 10000.0) - 0.5;
 }
 
 int vertexHas(Vertex *vertArr, Vertex v, int currSize) {
@@ -37,10 +38,9 @@ void attributeRandomNodesToVertex(Vertex *vertArr, int i, Node *nodes, Node *fro
     return attributeRandomNodesToVertex(vertArr, i, nodes, fromNode);
   }
 
-  if (vertexHas(vertArr, *(vertArr + i), i + 1)) { // Garante que o grafo vai ser digrafo
-    return;
+  if (vertexHas(vertArr, *(vertArr + i), i)) { // Garante que o grafo vai ser digrafo
+    return attributeRandomNodesToVertex(vertArr, i, nodes, fromNode);
   }
-
   if (fromNode == NULL) {
     (vertArr + i)->from = auxNode;
   } else {
@@ -49,6 +49,7 @@ void attributeRandomNodesToVertex(Vertex *vertArr, int i, Node *nodes, Node *fro
 }
 
 int main() {
+  srand(time(NULL));
   Node *nodes = malloc(sizeof(Node) * NUM_NODES);
 
   Vertex *verts = malloc(sizeof(Vertex) * NUM_VERTEXES);
@@ -75,8 +76,7 @@ int main() {
     printf("(%.2lf, %.2lf) -> (%.2lf, %.2lf)\n", (verts + i)->from->point.x, (verts + i)->from->point.y, (verts + i)->to->point.x, (verts + i)->to->point.y);
   }
 
-
-  if(render(verts))
+  if(render(nodes))
     return 0;
   return -1;
 }
