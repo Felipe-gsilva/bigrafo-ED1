@@ -2,7 +2,7 @@
 #include "main.h"
 
 struct OpenGL_Context {
-  Vertex* object_Window_Target; 
+  Edge* object_Window_Target; 
 };
 
 

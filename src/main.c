@@ -18,7 +18,7 @@ void attributeRandomValuesToPoint(Point *p) {
   p->y = (getRandom(15000, 0) / 10000.0) - 0.5;
 }
 
-int vertexHas(Vertex *vertArr, Vertex v, int currSize) {
+int EdgeHas(Edge *vertArr, Edge v, int currSize) {
   for (int i = 0; i < currSize; i++) {
     if ( // Compara os enderecos de nodes (n sei se funciona msm)
       ((vertArr + i)->to == v.from && (vertArr + i)->from == v.to) ||
@@ -31,15 +31,15 @@ int vertexHas(Vertex *vertArr, Vertex v, int currSize) {
   return 0;
 }
 
-void attributeRandomNodesToVertex(Vertex *vertArr, int i, Node *nodes, Node *fromNode) {
+void attributeRandomNodesToEdge(Edge *vertArr, int i, Node *nodes, Node *fromNode) {
   Node *auxNode = (nodes + getRandom(NUM_NODES, 0));
 
-  if (auxNode == fromNode) { // from e to, no Vertex, não podem ser iguais
-    return attributeRandomNodesToVertex(vertArr, i, nodes, fromNode);
+  if (auxNode == fromNode) { // from e to, no Edge, não podem ser iguais
+    return attributeRandomNodesToEdge(vertArr, i, nodes, fromNode);
   }
 
-  if (vertexHas(vertArr, *(vertArr + i), i)) { // Garante que o grafo vai ser digrafo
-    return attributeRandomNodesToVertex(vertArr, i, nodes, fromNode);
+  if (EdgeHas(vertArr, *(vertArr + i), i)) { // Garante que o grafo vai ser digrafo
+    return attributeRandomNodesToEdge(vertArr, i, nodes, fromNode);
   }
   if (fromNode == NULL) {
     (vertArr + i)->from = auxNode;
@@ -48,13 +48,35 @@ void attributeRandomNodesToVertex(Vertex *vertArr, int i, Node *nodes, Node *fro
   }
 }
 
+int isBigraph(Edge *verts, Node *nodes) {
+  int *visited = malloc(sizeof(int) * NUM_NODES);
+  int i;
+  Node *curr = nodes + 0; // 0 é o nó source
+
+  for (i = 0; i < NUM_NODES; i++) {
+    visited[i] = 0;
+  }
+
+  visited[curr->id]++;
+
+  while(1) {
+
+
+    curr = (verts + curr->id)->to;
+  }
+}
+
+void attributeGraphs(Edge *mainVertArr, Edge *leftEdgeSet, Edge *rightNodeSet) {
+    
+}
+
 int main() {
   srand(time(NULL));
   Node *nodes = malloc(sizeof(Node) * NUM_NODES);
 
-  Vertex *verts = malloc(sizeof(Vertex) * NUM_VERTEXES);
-  Vertex *leftVertexSet = malloc(sizeof(Vertex) * ceil(NUM_VERTEXES / 2));
-  Vertex *rightVertexSet = malloc(sizeof(Vertex) * ceil(NUM_VERTEXES / 2));
+  Edge *edges = malloc(sizeof(Edge) * NUM_EDGES);
+  Edge *leftEdgeSet = malloc(sizeof(Edge) * ceil(NUM_EDGES / 2));
+  Edge *rightEdgeSet = malloc(sizeof(Edge) * ceil(NUM_EDGES / 2));
 
   Point *p;
 
@@ -65,16 +87,19 @@ int main() {
     attributeRandomValuesToPoint(p);
 
     (nodes + i)->point = *p;
+    (nodes + i)->id = i;
 
     printf("(%.2lf, %.2lf)\n", (nodes + i)->point.x, (nodes + i)->point.y);
   }
 
-  for (i = 0; i < NUM_VERTEXES; i++) {
-    attributeRandomNodesToVertex(verts, i, nodes, NULL);
-    attributeRandomNodesToVertex(verts, i, nodes, (verts + i)->from);
+  for (i = 0; i < NUM_EDGES; i++) {
+    attributeRandomNodesToEdge(edges, i, nodes, NULL);
+    attributeRandomNodesToEdge(edges, i, nodes, (edges + i)->from);
 
-    printf("(%.2lf, %.2lf) -> (%.2lf, %.2lf)\n", (verts + i)->from->point.x, (verts + i)->from->point.y, (verts + i)->to->point.x, (verts + i)->to->point.y);
+    printf("(%.2lf, %.2lf) -> (%.2lf, %.2lf)\n", (edges + i)->from->point.x, (edges + i)->from->point.y, (edges + i)->to->point.x, (edges + i)->to->point.y);
   }
+
+  isBigraph(edges, nodes);
 
   if(render(nodes))
     return 0;
