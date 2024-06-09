@@ -2,117 +2,84 @@
 #include <stdlib.h>
 #include <math.h>
 #include "main.h"
-#include "render.h"
 #include <time.h>
 
 int getRandom(int ceil, int floor) {
   return (rand() % ceil) + floor;
 }
 
-/**
- * Atribui x e y para o endereco do ponto p
- * (x, y) = (93.83, 8.86)
- */
-void attributeRandomValuesToPoint(Point *p) {
-  p->x = (getRandom(15000, 0) / 10000.0) - 0.5;
-  p->y = (getRandom(15000, 0) / 10000.0) - 0.5;
-  p->color = 0.0; 
+void attributeRandomCoord(Coord *coord) {
+  coord = malloc(sizeof(Coord));
+  coord->x = getRandom(20000, -10000) / 10000.0; // max=1, min=-1
+  coord->y = getRandom(20000, -10000) / 10000.0;
+  coord->color = 0.0;
 }
 
-int EdgeHas(Edge *vertArr, Edge v, int currSize) {
-  for (int i = 0; i < currSize; i++) {
-    if ( // Compara os enderecos de nodes (n sei se funciona msm)
-      ((vertArr + i)->to == v.from && (vertArr + i)->from == v.to) ||
-      (vertArr + i)->from == v.to && (vertArr + i)->to == v.from
-    ) {
-      return 1;
-    }
+void addRandomEdge(int matAdj[NUM_NODES][NUM_NODES]) {
+  int u = getRandom(NUM_NODES, 0);
+  int v = getRandom(NUM_NODES, 0);
+
+  if (u == v) {
+    return addRandomEdge(matAdj);
   }
 
-  return 0;
-}
-
-void attributeRandomNodesToEdge(Edge *vertArr, int i, Node *nodes, Node *fromNode) {
-  Node *auxNode = (nodes + getRandom(NUM_NODES, 0));
-
-  if (auxNode == fromNode) { // from e to, no Edge, não podem ser iguais
-    return attributeRandomNodesToEdge(vertArr, i, nodes, fromNode);
+  if (matAdj[u][v] != 0) {
+    return addRandomEdge(matAdj);
   }
 
-  if (EdgeHas(vertArr, *(vertArr + i), i)) { // Garante que o grafo vai ser digrafo
-    return attributeRandomNodesToEdge(vertArr, i, nodes, fromNode);
-  }
-  if (fromNode == NULL) {
-    (vertArr + i)->from = auxNode;
-  } else {
-    (vertArr + i)->to = auxNode;
-  }
-}
-
-int isBigraph(Edge *verts, Node *nodes) {
-  int *visited = malloc(sizeof(int) * NUM_NODES);
-  int i;
-  Node *curr = nodes + 0; // 0 é o nó source
-
-  for (i = 0; i < NUM_NODES; i++) {
-    visited[i] = 0;
-  }
-
-  visited[curr->id]++;
-
-  while(1) {
-
-
-    curr = (verts + curr->id)->to;
-  }
-}
-
-void attributeGraphs(Edge *mainVertArr, Edge *leftEdgeSet, Edge *rightNodeSet) {
-    
+  matAdj[u][v] = 1;
 }
 
 int main() {
   srand(time(NULL));
-  Node *nodes = malloc(sizeof(Node) * NUM_NODES);
+  int i, edgeIndex[NUM_EDGES][2];
+  int index = 0;
+  int grafo[NUM_NODES][NUM_NODES];
+  Coord *coord = malloc(sizeof(Coord) * NUM_NODES);
 
-  Edge *edges = malloc(sizeof(Edge) * NUM_EDGES);
-  Edge *leftEdgeSet = malloc(sizeof(Edge) * ceil(NUM_EDGES / 2));
-  Edge *rightEdgeSet = malloc(sizeof(Edge) * ceil(NUM_EDGES / 2));
-
-  Point *p;
-
-  int i;
-
-  // RENAN DA UM JEITO DE FAZER ISSO DAQUI COLOCAR OS EDGES CORRETOS
-  int edgeIndex[NUM_EDGES][2] = {
-    {0, 1},
-    {1, 2},
-    {4, 3},
-    {3, 0},
-    {0, 2},
-    {1, 4}
-  };
+  for (int i = 0; i < NUM_NODES; i++) {
+    for (int j = 0; j < NUM_NODES; j++) {
+      grafo[i][j] = 0;
+    }
+  }
 
   for (i = 0; i < NUM_NODES; i++) {
-    p = malloc(sizeof(Point));
-    attributeRandomValuesToPoint(p);
-
-    (nodes + i)->point = *p;
-    (nodes + i)->id = i;
-
-    printf("(%.2lf, %.2lf)\n", (nodes + i)->point.x, (nodes + i)->point.y);
+    attributeRandomCoord(&coord[i]);
   }
 
   for (i = 0; i < NUM_EDGES; i++) {
-    attributeRandomNodesToEdge(edges, i, nodes, NULL);
-    attributeRandomNodesToEdge(edges, i, nodes, (edges + i)->from);
-
-    printf("(%.2lf, %.2lf) -> (%.2lf, %.2lf)\n", (edges + i)->from->point.x, (edges + i)->from->point.y, (edges + i)->to->point.x, (edges + i)->to->point.y);
+    addRandomEdge(grafo);
   }
 
-  if(render(nodes, edgeIndex)!= 0)
-    return -1;
+  for (int i = 0; i < NUM_NODES; i++) {
+    for (int j = 0; j < NUM_NODES; j++) {
+      printf("%d\t", grafo[i][j]);
+    }
+      printf("\n");
+  }
 
-  isBigraph(edges, nodes);
+  for (int i = 0; i < NUM_NODES; i++) {
+    for (int j = 0; j < NUM_NODES; j++) {
+      if (grafo[i][j] != -1) {
+        edgeIndex[index][0] = i;
+        edgeIndex[index++][1] = j;
+      }
+    }
+  }
+
+  for (int i = 0; i < NUM_EDGES; i++) {
+    printf("%d ", edgeIndex[i][0]);
+    printf("%d\n", edgeIndex[i][1]);
+  }
+
+  if (isBigraph(grafo)) {
+    printf("E bigrafo! :)\n");
+  } else {
+    printf("Nao e bigrafo :(\n");
+  }
+  
+  if(render(grafo, edgeIndex)!= 0)
+    return -1;
+  
   return 0;
 }

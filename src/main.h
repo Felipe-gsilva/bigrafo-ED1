@@ -2,21 +2,11 @@
 
 #include <stdbool.h>
 
-#define NUM_NODES 5
-#define NUM_EDGES 7
+#define NUM_NODES 4
+#define NUM_EDGES 8
 
-typedef struct {
+typedef struct coord {
     double x;
     double y;
     double color;
-} Point;
-
-typedef struct {
-    Point point;
-    int id;
-} Node;
-
-typedef struct {
-    Node *from;
-    Node *to;
-} Edge;
+} Coord;
