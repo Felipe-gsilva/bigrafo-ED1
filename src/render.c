@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "window.h"
+#include "render.h"
 
 Point **getVertexPos(Node *vertexArr)
 {
@@ -15,6 +15,10 @@ Point **getVertexPos(Node *vertexArr)
     vertexPos[i] = malloc(sizeof(Point));  // Allocate memory for each Point
     vertexPos[i]->x = vertexArr[i].point.x;
     vertexPos[i]->y = vertexArr[i].point.y;
+    if(vertexArr[i].point.color == 0)
+      vertexPos[i]->color = 1.0f;
+    else
+      vertexPos[i]->color = 0.0f ;
   }
 
   for (int i = 0; i < NUM_NODES; i++)
@@ -26,31 +30,15 @@ Point **getVertexPos(Node *vertexArr)
   return vertexPos;
 }
 
-Edge **getEdges(Node *vertexArr)
-{
-  Edge **edges = malloc(sizeof(Edge*) * NUM_EDGES); 
-
-  for (int i = 0; i < NUM_EDGES; i++)
-  {
-    edges[i] = malloc(sizeof(Edge));  // Allocate memory for each Edge
-    edges[i]->from->point.x= vertexArr[i].point.x;
-    edges[i]->from->point.y= vertexArr[i].point.y;
-  }
-
-  for (int i = 0; i < NUM_EDGES; i++)
-  {
-    printf("Edge %d\n", i);
-    printf("from: %.2f %.2f\n", edges[i]->from->point.x, edges[i]->to->point.x);
-    printf("to: %.2f %.2f\n", edges[i]->from->point.y, edges[i]->to->point.y);
-  }
-
-  return edges;
-}
-
-
-int render(Node *vertexArr, Edge *edgeArr)
+int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
 {
   GLFWwindow* window;
+  float dotSize = 20.0f;
+  uint width = 640;
+  uint height = 480;
+  // get all vertex positions on R²
+  Point **vertex = getVertexPos(vertexArr);
+  float vertexData[NUM_NODES][3];  
 
   if (!glfwInit())
     return -1;
@@ -58,9 +46,6 @@ int render(Node *vertexArr, Edge *edgeArr)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  uint width = 640;
-  uint height = 480;
 
   window = glfwCreateWindow(width, height, "bígrafo", NULL, NULL);
 
@@ -78,57 +63,49 @@ int render(Node *vertexArr, Edge *edgeArr)
     return -1;
   }
 
-  // get all vertex positions on R²
-  Point **vertex = getVertexPos(vertexArr);
-
   glViewport(0, 0, width, height);
 
-  // creating a VAO to input on VBO 
-  unsigned int VAO[2], VBO[2];
-  glGenVertexArrays(1, &VAO[0]); 
-  glGenBuffers(1, &VBO[0]); 
-
-  glBindVertexArray(VAO[0]);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-
-
-  float vertexData[NUM_NODES][2];  
-
+  // getting the vertex and edge data
   for (int i = 0; i < NUM_NODES; i++) {
     vertexData[i][0] = vertex[i]->x;
     vertexData[i][1] = vertex[i]->y;
+    vertexData[i][2] = 0.0f;
   }
 
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * NUM_NODES, vertexData, GL_STATIC_DRAW);
 
   const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
+    "layout(location = 0) in vec3 aPos;\n"
+    "out vec4 LineColor;\n"  
+
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
+    "   gl_Position = vec4(aPos, 1.0);\n"
+    "   if (aPos.z == 0.0)\n"
+    "     LineColor = vec4(0.0, aPos.z, 1.0, 1.0);\n"  
+    "   else\n"
+    "     LineColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
     "}\0";
 
-  unsigned int vertexShader;
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
+  unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vs, 1, &vertexShaderSource, NULL);
+  glCompileShader(vs);
 
   int  success;
   char infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+  glGetShaderiv(vs, GL_COMPILE_STATUS, &success);
 
   if(!success)
   {
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+    glGetShaderInfoLog(vs, 512, NULL, infoLog);
     printf("error while compiling vertex shader %s\n", infoLog);
   }
 
   const char *fragmentShaderSource = "#version 330 core\n"
+    "in vec4 LineColor;\n"
     "out vec4 FragColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(0.0f, 0.5f, 0.2f, 1.0f);\n"
+    "  FragColor = LineColor;\n"
     "}\0";
 
   unsigned int fragmentShader;
@@ -146,7 +123,7 @@ int render(Node *vertexArr, Edge *edgeArr)
   }
 
   unsigned int shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
+  glAttachShader(shaderProgram, vs);
   glAttachShader(shaderProgram, fragmentShader);
   glLinkProgram(shaderProgram);
 
@@ -158,47 +135,34 @@ int render(Node *vertexArr, Edge *edgeArr)
     printf("error while linking program %s\n", infoLog);
   }
 
+  // creating a VAO to input on VBO 
+  unsigned int VAO, VBO;
 
+  // ----------------------------------------------------------
+  // drawing the vertex 
+  glGenVertexArrays(1, &VAO); 
+  glGenBuffers(1, &VBO); 
 
-  // the probably most important part
-  // first param: location of the vertex attribute (like location = 0 in the vertex shader)
-  // second param: size of the vertex attribute (vec2 has size 2 or our Point struct)
-  // third param: type of the data
-  // fourth param: if the data should be normalized
-  // fifth param: stride (space between consecutive vertex attributes)
-  // sixth param: offset of the first component of the first vertex attribute
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * NUM_NODES, vertexData, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
-  float dotSize = 20.0f;
 
   // ----------------------------------------------------------
   // drawing the edges
 
-  float edgeData[NUM_EDGES][4];
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 2 * NUM_EDGES, edgeIndex, GL_STATIC_DRAW);
   
-  for (int i = 0; i < NUM_EDGES; i++) {
-    edgeData[i][0] = edgeArr[i].from->point.x;
-    edgeData[i][1] = edgeArr[i].from->point.y;
-    edgeData[i][2] = edgeArr[i].to->point.x;
-    edgeData[i][3] = edgeArr[i].to->point.y;
-    printf("Edge %d\n", i);
-    printf("from: %.2f %.2f\n", edgeData[i][0], edgeData[i][1]);
-    printf("to: %.2f %.2f\n", edgeData[i][2], edgeData[i][3]);
-  }
-  
-  glGenVertexArrays(1, &VAO[1]);
-  glGenBuffers(1, &VBO[1]);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-
-  glBufferData(GL_ARRAY_BUFFER, sizeof(edgeData), edgeData, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(1);
 
   // ----------------------------------------------------------
   // deleting compiled shaders
-  glDeleteShader(vertexShader);
+  glDeleteShader(vs);
   glDeleteShader(fragmentShader);
 
   // render loop
@@ -214,18 +178,23 @@ int render(Node *vertexArr, Edge *edgeArr)
 
     // draw dots
     glPointSize(dotSize);
-    glBindVertexArray(VAO[0]);
+    glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, NUM_NODES);
 
     // draw edges 
-    glBindVertexArray(VAO[1]);
-    glDrawArrays(GL_LINE_LOOP, 1, NUM_EDGES);
+    glLineWidth(2.5f);
+    glBindVertexArray(EBO);
+    glDrawElements(GL_LINES, NUM_EDGES,GL_UNSIGNED_INT, 0);
 
     // swap buffers and poll IO events
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
+  // delete all
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteProgram(shaderProgram);
   glfwTerminate();
   return 0;
 }
