@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "main.h"
+#include "render.h"
 #include <time.h>
 
 int getRandom(int ceil, int floor) {
@@ -9,9 +10,8 @@ int getRandom(int ceil, int floor) {
 }
 
 void attributeRandomCoord(Coord *coord) {
-  coord = malloc(sizeof(Coord));
   coord->x = getRandom(20000, -10000) / 10000.0; // max=1, min=-1
-  coord->y = getRandom(20000, -10000) / 10000.0;
+  coord->y = getRandom(20000, -10000) / 10000.0; // max=1, min=-1
   coord->color = 0.0;
 }
 
@@ -43,10 +43,6 @@ int main() {
     }
   }
 
-  for (i = 0; i < NUM_NODES; i++) {
-    attributeRandomCoord(&coord[i]);
-  }
-
   for (i = 0; i < NUM_EDGES; i++) {
     addRandomEdge(grafo);
   }
@@ -67,19 +63,12 @@ int main() {
     }
   }
 
-  for (int i = 0; i < NUM_EDGES; i++) {
-    printf("%d ", edgeIndex[i][0]);
-    printf("%d\n", edgeIndex[i][1]);
+  for (int i = 0; i < NUM_NODES; i++) {
+    attributeRandomCoord(&coord[i]);
   }
 
-  if (isBigraph(grafo)) {
-    printf("E bigrafo! :)\n");
-  } else {
-    printf("Nao e bigrafo :(\n");
-  }
-  
-  if(render(grafo, edgeIndex)!= 0)
+  if(render(coord, edgeIndex)!= 0)
     return -1;
-  
+
   return 0;
 }

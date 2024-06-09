@@ -2,11 +2,11 @@
 
 #include <stdbool.h>
 
-#define NUM_NODES 4
-#define NUM_EDGES 8
+#define NUM_NODES 10
+#define NUM_EDGES 10
 
-typedef struct coord {
-    double x;
-    double y;
-    double color;
+typedef struct {
+    float x;
+    float y;
+    float color;
 } Coord;

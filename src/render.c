@@ -6,16 +6,16 @@
 
 #include "render.h"
 
-Point **getVertexPos(Node *vertexArr)
+Coord **getVertexPos(Coord *vertexArr)
 {
-  Point **vertexPos = malloc(sizeof(Point*) * NUM_NODES);  // Correct memory allocation for the array of pointers
+  Coord **vertexPos = malloc(sizeof(Coord *) * NUM_NODES);  // Correct memory allocation for the array of pointers
 
   for (int i = 0; i < NUM_NODES; i++)
   {
-    vertexPos[i] = malloc(sizeof(Point));  // Allocate memory for each Point
-    vertexPos[i]->x = vertexArr[i].point.x;
-    vertexPos[i]->y = vertexArr[i].point.y;
-    vertexPos[i]->color = vertexArr[i].point.color;
+    vertexPos[i] = malloc(sizeof(Coord));  // Allocate memory for each Point
+    vertexPos[i]->x = vertexArr[i].x;
+    vertexPos[i]->y = vertexArr[i].y;
+    vertexPos[i]->color = vertexArr[i].color;
   }
 
   for (int i = 0; i < NUM_NODES; i++)
@@ -27,15 +27,16 @@ Point **getVertexPos(Node *vertexArr)
   return vertexPos;
 }
 
-int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
+int render(Coord *vertexArr, int edgeIndex[NUM_EDGES][2])
 {
   GLFWwindow* window;
   float dotSize = 20.0f;
   uint width = 640;
   uint height = 480;
   // get all vertex positions on R²
-  Point **vertex = getVertexPos(vertexArr);
-  float vertexData[NUM_NODES][3];  
+  Coord **vertex = getVertexPos(vertexArr);
+  printf(" tamanho %.2f", (float)sizeof(Coord)/sizeof(double));
+  float vertexData[NUM_NODES][sizeof(Coord)/sizeof(double)];  
 
   if (!glfwInit())
     return -1;
@@ -66,7 +67,7 @@ int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
   for (int i = 0; i < NUM_NODES; i++) {
     vertexData[i][0] = vertex[i]->x;
     vertexData[i][1] = vertex[i]->y;
-    vertexData[i][2] = 0.0f;
+    vertexData[i][2] = vertex[i]->color; 
   }
 
 
@@ -85,17 +86,17 @@ int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
     "   LineColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
     "}\0";
 
-  unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vs, 1, &vertexShaderSource, NULL);
-  glCompileShader(vs);
+  unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+  glCompileShader(vertexShader);
 
   int  success;
   char infoLog[512];
-  glGetShaderiv(vs, GL_COMPILE_STATUS, &success);
+  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
   if(!success)
   {
-    glGetShaderInfoLog(vs, 512, NULL, infoLog);
+    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
     printf("error while compiling vertex shader %s\n", infoLog);
   }
 
@@ -122,7 +123,7 @@ int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
   }
 
   unsigned int shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vs);
+  glAttachShader(shaderProgram, vertexShader);
   glAttachShader(shaderProgram, fragmentShader);
   glLinkProgram(shaderProgram);
 
@@ -144,9 +145,9 @@ int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
 
   glBindVertexArray(VAO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * NUM_NODES, vertexData, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
 
@@ -156,12 +157,12 @@ int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
   unsigned int EBO;
   glGenBuffers(1, &EBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 2 * NUM_EDGES, edgeIndex, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * NUM_EDGES * 2, edgeIndex, GL_DYNAMIC_DRAW);
   
 
   // ----------------------------------------------------------
   // deleting compiled shaders
-  glDeleteShader(vs);
+  glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
   // render loop
@@ -183,7 +184,7 @@ int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
     // draw edges 
     glLineWidth(2.0f);
     glBindVertexArray(EBO);
-    glDrawElements(GL_LINES, NUM_EDGES, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, 2 * NUM_EDGES, GL_UNSIGNED_INT, 0);
 
     // swap buffers and poll IO events
     glfwSwapBuffers(window);
