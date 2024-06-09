@@ -82,8 +82,10 @@ int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
     "   gl_Position = vec4(aPos, 1.0);\n"
     "   if (aPos.z == 0.0)\n"
     "     LineColor = vec4(0.0, aPos.z, 1.0, 1.0);\n"  
-    "   else\n"
+    "   else if(aPos.z == 1.0)\n"
     "     LineColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+    "   else \n"
+    "   LineColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
     "}\0";
 
   unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
