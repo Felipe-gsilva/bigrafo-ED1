@@ -17,11 +17,11 @@ void attributeRandomValuesToPoint(Point *p) {
   p->y = getRandom(10000, 0) / 100.0;
 }
 
-int EdgeHas(Edge *vertArr, Edge v, int currSize) {
+int EdgeHas(Edge *edges, Edge v, int currSize) {
   for (int i = 0; i < currSize; i++) {
     if ( // Compara os enderecos de nodes (n sei se funciona msm)
-      ((vertArr + i)->to == v.from && (vertArr + i)->from == v.to) ||
-      (vertArr + i)->from == v.to && (vertArr + i)->to == v.from
+      ((edges + i)->to == v.from && (edges + i)->from == v.to) ||
+      (edges + i)->from == v.to && (edges + i)->to == v.from
     ) {
       return 1;
     }
@@ -30,21 +30,25 @@ int EdgeHas(Edge *vertArr, Edge v, int currSize) {
   return 0;
 }
 
-void attributeRandomNodesToEdge(Edge *vertArr, int i, Node *nodes, Node *fromNode) {
+int findToNode(Node *nodes, ) {
+
+}
+
+void attributeRandomNodesToEdge(Edge *edges, int i, Node *nodes, Node *fromNode) {
   Node *auxNode = (nodes + getRandom(NUM_NODES, 0));
 
   if (auxNode == fromNode) { // from e to, no Edge, não podem ser iguais
-    return attributeRandomNodesToEdge(vertArr, i, nodes, fromNode);
+    return attributeRandomNodesToEdge(edges, i, nodes, fromNode);
   }
 
-  if (EdgeHas(vertArr, *(vertArr + i), i)) { // Garante que o grafo vai ser digrafo
-    return attributeRandomNodesToEdge(vertArr, i, nodes, fromNode);
+  if (EdgeHas(edges, *(edges + i), i)) { // Garante que o grafo vai ser digrafo
+    return attributeRandomNodesToEdge(edges, i, nodes, fromNode);
   }
 
   if (fromNode == NULL) {
-    (vertArr + i)->from = auxNode;
+    (edges + i)->from = auxNode;
   } else {
-    (vertArr + i)->to = auxNode;
+    (edges + i)->to = auxNode;
   }
 }
 
@@ -60,9 +64,7 @@ int isBigraph(Edge *verts, Node *nodes) {
   visited[curr->id]++;
 
   while(1) {
-
-
-    curr = (verts + curr->id)->to;
+    verts
   }
 }
 
