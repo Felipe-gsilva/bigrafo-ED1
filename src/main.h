@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #define NUM_NODES 4
-#define NUM_EDGES 8
+#define NUM_EDGES 4
 
 typedef struct coord {
     double x;
