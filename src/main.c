@@ -70,7 +70,7 @@ int isBigraph(int mat[NUM_NODES][NUM_NODES], Coord *coords) {
 
   for (int i = 0; i < NUM_NODES; i++) {
     if (coords[i].color != 1 && coords[i].color != -1) {
-      coords[i].color = (color[i] == 1) ? 1 : -1;
+      coords[i].color = (color[i] == 1) ? 1 : 0;
     }
   }
   return 1;
@@ -120,7 +120,7 @@ int main() {
   }
 
   for (int i = 0; i < NUM_NODES; i++) {
-    printf("%lf\n", coord[i].color);
+    printf("color: %.1f\n", coord[i].color);
   }
 
   if(render(coord, edgeIndex)!= 0)

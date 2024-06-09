@@ -1,9 +1,7 @@
 #pragma once
 
-#include <stdbool.h>
-
 #define NUM_NODES 4
-#define NUM_EDGES 4
+#define NUM_EDGES 3
 
 typedef struct {
     float x;
