@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "main.h"
-#include "window.h"
+#include "render.h"
+#include <time.h>
 
 int getRandom(int ceil, int floor) {
   return (rand() % ceil) + floor;
@@ -13,8 +14,9 @@ int getRandom(int ceil, int floor) {
  * (x, y) = (93.83, 8.86)
  */
 void attributeRandomValuesToPoint(Point *p) {
-  p->x = getRandom(10000, 0) / 100.0;
-  p->y = getRandom(10000, 0) / 100.0;
+  p->x = (getRandom(15000, 0) / 10000.0) - 0.5;
+  p->y = (getRandom(15000, 0) / 10000.0) - 0.5;
+  p->color = 0.0; 
 }
 
 int EdgeHas(Edge *edges, Edge v, int currSize) {
@@ -44,7 +46,6 @@ void attributeRandomNodesToEdge(Edge *edges, int i, Node *nodes, Node *fromNode)
   if (EdgeHas(edges, *(edges + i), i)) { // Garante que o grafo vai ser digrafo
     return attributeRandomNodesToEdge(edges, i, nodes, fromNode);
   }
-
   if (fromNode == NULL) {
     (edges + i)->from = auxNode;
   } else {
@@ -73,6 +74,7 @@ void attributeGraphs(Edge *mainVertArr, Edge *leftEdgeSet, Edge *rightNodeSet) {
 }
 
 int main() {
+  srand(time(NULL));
   Node *nodes = malloc(sizeof(Node) * NUM_NODES);
 
   Edge *edges = malloc(sizeof(Edge) * NUM_EDGES);
@@ -82,6 +84,16 @@ int main() {
   Point *p;
 
   int i;
+
+  // RENAN DA UM JEITO DE FAZER ISSO DAQUI COLOCAR OS EDGES CORRETOS
+  int edgeIndex[NUM_EDGES][2] = {
+    {0, 1},
+    {1, 2},
+    {4, 3},
+    {3, 0},
+    {0, 2},
+    {1, 4}
+  };
 
   for (i = 0; i < NUM_NODES; i++) {
     p = malloc(sizeof(Point));
@@ -100,8 +112,9 @@ int main() {
     printf("(%.2lf, %.2lf) -> (%.2lf, %.2lf)\n", (edges + i)->from->point.x, (edges + i)->from->point.y, (edges + i)->to->point.x, (edges + i)->to->point.y);
   }
 
+  if(render(nodes, edgeIndex)!= 0)
+    return -1;
+
   isBigraph(edges, nodes);
-  if(render(edges))
-    return 0;
-  return -1;
+  return 0;
 }
