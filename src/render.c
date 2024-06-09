@@ -15,10 +15,7 @@ Point **getVertexPos(Node *vertexArr)
     vertexPos[i] = malloc(sizeof(Point));  // Allocate memory for each Point
     vertexPos[i]->x = vertexArr[i].point.x;
     vertexPos[i]->y = vertexArr[i].point.y;
-    if(vertexArr[i].point.color == 0)
-      vertexPos[i]->color = 1.0f;
-    else
-      vertexPos[i]->color = 0.0f ;
+    vertexPos[i]->color = vertexArr[i].point.color;
   }
 
   for (int i = 0; i < NUM_NODES; i++)
@@ -184,9 +181,9 @@ int render(Node *vertexArr, int edgeIndex[NUM_EDGES][2])
     glDrawArrays(GL_POINTS, 0, NUM_NODES);
 
     // draw edges 
-    glLineWidth(2.5f);
+    glLineWidth(2.0f);
     glBindVertexArray(EBO);
-    glDrawElements(GL_LINES, NUM_EDGES,GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, NUM_EDGES, GL_UNSIGNED_INT, 0);
 
     // swap buffers and poll IO events
     glfwSwapBuffers(window);
