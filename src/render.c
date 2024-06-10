@@ -21,7 +21,7 @@ Coord **getVertexPos(Coord *vertexArr)
     for (int i = 0; i < NUM_NODES; i++)
     {
         printf("VertexPos %d\n", i);
-        printf("%.2f %.2f\n", vertexPos[i]->x, vertexPos[i]->y);
+        printf("x: %.2f -- y: %.2f\n", vertexPos[i]->x, vertexPos[i]->y);
     }
 
     return vertexPos;
@@ -30,13 +30,20 @@ Coord **getVertexPos(Coord *vertexArr)
 int render(Coord *vertexArr, int edgeIndex[NUM_EDGES][2])
 {
     GLFWwindow* window;
+
     float dotSize = 20.0f;
+    float lineWidth = 2.5f;
+
     uint width = 640;
     uint height = 480;
+
+    // stride for the vertex data 
+    int stride = (int)sizeof(Coord)/sizeof(float);
+
     // get all vertex positions on R²
     Coord **vertex = getVertexPos(vertexArr);
-    printf(" tamanho %.2f", (float)sizeof(Coord)/sizeof(double));
-    float vertexData[NUM_NODES][3];
+
+    float vertexData[NUM_NODES][stride];
 
     if (!glfwInit())
         return -1;
@@ -144,7 +151,7 @@ int render(Coord *vertexArr, int edgeIndex[NUM_EDGES][2])
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, stride, GL_FLOAT, GL_FALSE, sizeof(Coord), (void*)0);
     glEnableVertexAttribArray(0);
 
     // ----------------------------------------------------------
@@ -177,7 +184,7 @@ int render(Coord *vertexArr, int edgeIndex[NUM_EDGES][2])
         glDrawArrays(GL_POINTS, 0, NUM_NODES);
 
         // draw edges
-        glLineWidth(3.0f);
+        glLineWidth(lineWidth);
         glBindVertexArray(VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glDrawElements(GL_LINES, NUM_EDGES * 2, GL_UNSIGNED_INT, 0);
